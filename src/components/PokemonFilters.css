@@ -1,0 +1,44 @@
+.filters-container {
+  padding: 0 10px 10px;
+}
+
+.filter-group {
+  margin-bottom: 10px;
+}
+
+.filter-label {
+  font-weight: bold;
+  margin-left: 10px;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 10px;
+}
+
+.type-chip {
+  color: white;
+  text-transform: capitalize;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+  --padding-start: 12px;
+  --padding-end: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.type-chip.selected {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.clear-filters-button {
+  margin-top: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: 10px;
+}

@@ -1,0 +1,14 @@
+.pokedex-grid {
+    padding: 10px;
+}
+
+.pokedex-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    padding: 0 20px;
+    margin-top: 20px;
+}
+
+ion-searchbar {
+    padding: 0 10px;
+}

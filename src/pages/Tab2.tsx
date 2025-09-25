@@ -1,97 +1,167 @@
 import React, { useState, useEffect } from "react";
 import {
   IonContent,
-  IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
-  IonList,
   IonSearchbar,
   IonToast,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonSpinner,
 } from "@ionic/react";
 
 import { Pokemon } from "../models/Pokemon.models";
 import PokemonItem from "../components/Pokemons";
 import PokemonFilters from "../components/PokemonFilters";
 import { getDailyPokemon, markDailyAsFound } from "../services/dailyPokemon";
+import "./Tab2.css";
 
 const Tab2: React.FC = () => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[] | null>(null);
+  const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[] | null>(
+    null
+  );
   const [searchText, setSearchText] = useState("");
   const [toastMessage, setToastMessage] = useState("");
   const [nextUrl, setNextUrl] = useState<string | null>(
     "https://pokeapi.co/api/v2/pokemon?limit=30&offset=0"
   );
+  const [isLoading, setIsLoading] = useState(false);
 
   const types: string[] = [
-    "normal","fire","water","grass","electric","ice","fighting","poison",
-    "ground","flying","psychic","bug","rock","ghost","dark","dragon","steel","fairy"
+    "normal",
+    "fire",
+    "water",
+    "grass",
+    "electric",
+    "ice",
+    "fighting",
+    "poison",
+    "ground",
+    "flying",
+    "psychic",
+    "bug",
+    "rock",
+    "ghost",
+    "dark",
+    "dragon",
+    "steel",
+    "fairy",
   ];
-  const generations: number[] = [1,2,3,4,5,6,7,8,9];
+  const generations: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
   useEffect(() => {
     loadPokemons();
   }, []);
 
-  // 🔹 Scroll infinito para cargar todos
   const loadPokemons = async (event?: CustomEvent<void>) => {
-    if (!nextUrl) return;
+    if (!nextUrl || isLoading) return;
+    setIsLoading(true);
 
-    const response = await fetch(nextUrl);
-    const data = await response.json();
-    setNextUrl(data.next);
+    try {
+      const response = await fetch(nextUrl);
+      const data = await response.json();
+      setNextUrl(data.next);
 
-    const list: Pokemon[] = await Promise.all(
-      data.results.map(async (p: { url: string }) => {
-        const res = await fetch(p.url);
-        return res.json();
-      })
-    );
+      const list: Pokemon[] = await Promise.all(
+        data.results.map(async (p: { url: string }) => {
+          const res = await fetch(p.url);
+          return res.json();
+        })
+      );
 
-    setPokemons((prev) => [...prev, ...list]);
+      setPokemons((prev) => [...prev, ...list]);
+    } catch (error) {
+      console.error("Failed to load pokemon list", error);
+      setToastMessage("Could not load more Pokémon.");
+    }
 
+    setIsLoading(false);
     if (event) {
       (event.target as HTMLIonInfiniteScrollElement).complete();
     }
   };
 
-  // 🔹 Filtrar por tipo
   const filterByType = async (type: string) => {
-    const response = await fetch(`https://pokeapi.co/api/v2/type/${type}`);
-    const data = await response.json();
-
-    const pokes: Pokemon[] = await Promise.all(
-      data.pokemon.map(async (p: any) => {
-        const res = await fetch(p.pokemon.url);
-        return res.json();
-      })
-    );
-    setFilteredPokemons(pokes);
+    setIsLoading(true);
+    setFilteredPokemons([]);
+    try {
+      const response = await fetch(`https://pokeapi.co/api/v2/type/${type}`);
+      const data = await response.json();
+      const pokes: Pokemon[] = await Promise.all(
+        data.pokemon.map(async (p: any) => {
+          const res = await fetch(p.pokemon.url);
+          return res.json();
+        })
+      );
+      setFilteredPokemons(pokes);
+    } catch (error) {
+      setToastMessage(`Failed to filter by type: ${type}`);
+      setFilteredPokemons(null);
+    }
+    setIsLoading(false);
   };
 
-  // 🔹 Filtrar por generación
   const filterByGeneration = async (gen: number) => {
-    const response = await fetch(`https://pokeapi.co/api/v2/generation/${gen}`);
-    const data = await response.json();
-
-    const pokes: Pokemon[] = await Promise.all(
-      data.pokemon_species.map(async (p: any) => {
-        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${p.name}`);
-        return res.json();
-      })
-    );
-    setFilteredPokemons(pokes);
+    setIsLoading(true);
+    setFilteredPokemons([]);
+    try {
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/generation/${gen}`
+      );
+      const data = await response.json();
+      const pokes: Pokemon[] = await Promise.all(
+        data.pokemon_species.map(async (p: any) => {
+          const res = await fetch(
+            `https://pokeapi.co/api/v2/pokemon/${p.name}`
+          );
+          return res.json();
+        })
+      );
+      setFilteredPokemons(pokes);
+    } catch (error) {
+      setToastMessage(`Failed to filter by generation: ${gen}`);
+      setFilteredPokemons(null);
+    }
+    setIsLoading(false);
   };
 
-  // 🔹 Buscar dentro de la lista activa
+  const handleSearch = async () => {
+    if (!searchText.trim()) {
+      clearFilters();
+      return;
+    }
+    setIsLoading(true);
+    setFilteredPokemons([]);
+    try {
+      const res = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/${searchText.toLowerCase().trim()}`
+      );
+      if (!res.ok) {
+        setToastMessage(`Pokémon "${searchText}" not found.`);
+        setFilteredPokemons(null);
+      } else {
+        const pokemon = await res.json();
+        setFilteredPokemons([pokemon]);
+      }
+    } catch (error) {
+      setToastMessage("An error occurred during search.");
+      setFilteredPokemons(null);
+    }
+    setIsLoading(false);
+  };
+
+  const clearFilters = () => {
+    setFilteredPokemons(null);
+    setSearchText("");
+  };
+
   const currentList = (filteredPokemons ?? pokemons).filter((p) =>
-    p.name.toLowerCase().includes(searchText.toLowerCase())
+    filteredPokemons ? true : p.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // 🔹 Encontrar al Pokémon del día
   const handleFound = (pokemon: Pokemon) => {
     const daily = getDailyPokemon();
     if (daily && !daily.found && daily.id === pokemon.id) {
@@ -102,51 +172,57 @@ const Tab2: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Pokédex</IonTitle>
-        </IonToolbar>
-      </IonHeader>
       <IonContent>
-        {/* Búsqueda */}
+        <h1 className="pokedex-title">Pokédex</h1>
         <IonSearchbar
           value={searchText}
           onIonInput={(e) => setSearchText(e.detail.value!)}
-          placeholder="Buscar Pokémon"
+          onIonClear={clearFilters}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          placeholder="Search by name or ID"
         />
 
-        {/* Filtros */}
         <PokemonFilters
           types={types}
           generations={generations}
           onTypeSelect={filterByType}
           onGenerationSelect={filterByGeneration}
+          onClear={clearFilters}
         />
 
-        {/* Lista */}
-        <IonList>
-          {currentList.map((poke, idx) => (
-            <div key={idx} onClick={() => handleFound(poke)}>
-              <PokemonItem pokemon={poke} />
-            </div>
-          ))}
-        </IonList>
+        {isLoading && (!pokemons.length || filteredPokemons) ? (
+          <div className="ion-text-center" style={{ marginTop: "20px" }}>
+            <IonSpinner name="bubbles" />
+          </div>
+        ) : (
+          <>
+            <IonGrid className="pokedex-grid">
+              <IonRow>
+                {currentList.map((poke, idx) => (
+                  <IonCol size="6" size-md="4" size-lg="3" key={poke.id}>
+                    <div onClick={() => handleFound(poke)}>
+                      <PokemonItem pokemon={poke} />
+                    </div>
+                  </IonCol>
+                ))}
+              </IonRow>
+            </IonGrid>
 
-        {/* Scroll infinito solo si no hay filtro */}
-        {!filteredPokemons && (
-          <IonInfiniteScroll
-            onIonInfinite={(e) => loadPokemons(e)}
-            threshold="100px"
-            disabled={!nextUrl}
-          >
-            <IonInfiniteScrollContent
-              loadingSpinner="bubbles"
-              loadingText="Cargando más Pokémon..."
-            />
-          </IonInfiniteScroll>
+            {!filteredPokemons && (
+              <IonInfiniteScroll
+                onIonInfinite={(e) => loadPokemons(e)}
+                threshold="100px"
+                disabled={!nextUrl || isLoading}
+              >
+                <IonInfiniteScrollContent
+                  loadingSpinner="bubbles"
+                  loadingText="Cargando más Pokémon..."
+                />
+              </IonInfiniteScroll>
+            )}
+          </>
         )}
 
-        {/* Mensaje de recompensa */}
         <IonToast
           isOpen={!!toastMessage}
           message={toastMessage}
