@@ -73,7 +73,11 @@ const Tab2: React.FC = () => {
         })
       );
 
-      setPokemons((prev) => [...prev, ...list]);
+      setPokemons((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const newList = list.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...newList];
+      });
     } catch (error) {
       console.error("Failed to load pokemon list", error);
       setToastMessage("Could not load more Pokémon.");

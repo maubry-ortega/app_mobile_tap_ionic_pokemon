@@ -100,10 +100,6 @@ const Tab1: React.FC = () => {
     await loadDailyPokemon();
   };
 
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
   useIonViewWillEnter(() => {
     loadInitialData();
   });

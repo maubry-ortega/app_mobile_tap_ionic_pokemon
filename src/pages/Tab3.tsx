@@ -25,9 +25,8 @@ const GoldCoinIcon = () => (
     <path d="M10 18a8 8 0 100-16 8 8 0 000 16z" />
     <path
       fill="#FBBF24"
-      d="M10 18a8 8 0 100-16 8 8 0 000 16z"
-      transform="scale(0.85)"
-      transform-origin="center"
+      d="M10 18a8 8 0 100-16 8 8 0 000 16z" 
+      transform="scale(0.85) translate(1.5, 1.5)"
     />
     <text
       x="50%"
