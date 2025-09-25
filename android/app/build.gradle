@@ -22,6 +22,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    applicationVariants.all { variant ->
+    variant.outputs.all {
+        outputFileName = "pokedex-${variant.name}-${variant.versionName}.apk"
+    }
+}
 }
 
 repositories {
@@ -51,10 +57,4 @@ try {
     }
 } catch(Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
-}
-
-applicationVariants.all { variant ->
-    variant.outputs.all {
-        outputFileName = "pokedex-${variant.name}-${variant.versionName}.apk"
-    }
 }
