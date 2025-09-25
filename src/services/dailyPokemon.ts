@@ -1,7 +1,7 @@
 const DAILY_KEY = "pokemon_del_dia";
 
 export const setDailyPokemon = (id: number) => {
-  const today = new Date().toISOString().split("T")[0]; // fecha YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0];
   localStorage.setItem(DAILY_KEY, JSON.stringify({ id, date: today, found: false }));
 };
 

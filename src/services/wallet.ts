@@ -20,7 +20,7 @@ export const addCoins = async (amount: number): Promise<number> => {
 export const spendCoins = async (amount: number): Promise<boolean> => {
   const currentCoins = await getCoins();
   if (currentCoins < amount) {
-    return false; // Not enough coins
+    return false;
   }
   const newTotal = currentCoins - amount;
   await Preferences.set({

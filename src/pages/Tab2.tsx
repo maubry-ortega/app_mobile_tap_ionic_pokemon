@@ -112,17 +112,24 @@ const Tab2: React.FC = () => {
       const response = await fetch(
         `https://pokeapi.co/api/v2/generation/${gen}`
       );
+      if (!response.ok) {
+        throw new Error(`API request for generation ${gen} failed`);
+      }
       const data = await response.json();
-      const pokes: Pokemon[] = await Promise.all(
-        data.pokemon_species.map(async (p: any) => {
-          const res = await fetch(
-            `https://pokeapi.co/api/v2/pokemon/${p.name}`
-          );
+      const pokes: (Pokemon | null)[] = await Promise.all(
+        data.pokemon_species.map(async (p: { name: string; url: string }) => {
+          const id = p.url.split("/").filter(Boolean).pop();
+          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+          if (!res.ok) {
+            console.warn(`Failed to fetch pokemon with ID/URL: ${id} / ${p.url}`);
+            return null;
+          }
           return res.json();
         })
       );
-      setFilteredPokemons(pokes);
+      setFilteredPokemons(pokes.filter(Boolean) as Pokemon[]);
     } catch (error) {
+      console.error(error);
       setToastMessage(`Failed to filter by generation: ${gen}`);
       setFilteredPokemons(null);
     }
