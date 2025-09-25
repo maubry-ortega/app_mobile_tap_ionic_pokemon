@@ -1,0 +1,39 @@
+.wallet-card {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
+.wallet-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.coin-balance {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coin-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.favorites-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    padding: 0 20px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}

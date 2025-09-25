@@ -6,9 +6,15 @@ import {
   IonCardContent,
   IonSpinner,
   IonChip,
+  IonButton,
+  IonToast,
+  useIonViewWillEnter,
+  IonIcon,
 } from "@ionic/react";
 import { Pokemon, PokemonSpecies } from "../models/Pokemon.models";
 import { getDailyPokemon, setDailyPokemon } from "../services/dailyPokemon";
+import { getCoins, spendCoins } from "../services/wallet";
+import { refresh } from "ionicons/icons";
 import "./Tab1.css";
 
 const typeColorMap: { [key: string]: string } = {
@@ -32,22 +38,22 @@ const typeColorMap: { [key: string]: string } = {
   fairy: "#D685AD",
 };
 
+const REROLL_COST = 100;
+
 const Tab1: React.FC = () => {
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [funFact, setFunFact] = useState<string>("");
   const [backgroundColor, setBackgroundColor] = useState<string>("#ffffff");
   const [loading, setLoading] = useState<boolean>(true);
+  const [coins, setCoins] = useState(0);
+  const [toastMessage, setToastMessage] = useState("");
 
-  useEffect(() => {
-    loadDailyPokemon();
-  }, []);
-
-  const loadDailyPokemon = async () => {
+  const loadDailyPokemon = async (force = false) => {
     setLoading(true);
     const today = new Date().toISOString().split("T")[0];
     let daily = getDailyPokemon();
 
-    if (!daily || daily.date !== today) {
+    if (force || !daily || daily.date !== today) {
       const total = 1025;
       const randomId = Math.floor(Math.random() * total) + 1;
       setDailyPokemon(randomId);
@@ -78,7 +84,7 @@ const Tab1: React.FC = () => {
         );
         setFunFact(
           fact
-            ? fact.flavor_text.replace(/[\n\f]/g, " ")
+            ? fact.flavor_text.replace(new RegExp("[\n\f]", "g"), " ")
             : "No fun fact available."
         );
       } catch (error) {
@@ -89,9 +95,32 @@ const Tab1: React.FC = () => {
     }
   };
 
+  const loadInitialData = async () => {
+    setCoins(await getCoins());
+    await loadDailyPokemon();
+  };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  useIonViewWillEnter(() => {
+    loadInitialData();
+  });
+
+  const handleReroll = async () => {
+    const success = await spendCoins(REROLL_COST);
+    if (success) {
+      setCoins(await getCoins());
+      await loadDailyPokemon(true);
+    } else {
+      setToastMessage(`You don't have enough coins. Cost: ${REROLL_COST} 💰`);
+    }
+  };
+
   return (
     <IonPage>
-      <IonContent fullscreen style={{ '--background': backgroundColor }}>
+      <IonContent fullscreen style={{ "--background": backgroundColor }}>
         {loading ? (
           <div className="spinner-container">
             <IonSpinner name="bubbles" color="light" />
@@ -113,7 +142,7 @@ const Tab1: React.FC = () => {
                     {pokemon.types.map((t) => (
                       <IonChip
                         key={t.type.name}
-                        style={{ '--background': typeColorMap[t.type.name] }}
+                        style={{ "--background": typeColorMap[t.type.name] }}
                       >
                         {t.type.name}
                       </IonChip>
@@ -140,11 +169,29 @@ const Tab1: React.FC = () => {
                     <h2>Fun Fact</h2>
                     <p>{funFact}</p>
                   </div>
+
+                  <IonButton
+                    expand="block"
+                    fill="outline"
+                    color="light"
+                    onClick={handleReroll}
+                    disabled={coins < REROLL_COST}
+                    style={{ marginTop: "20px" }}
+                  >
+                    <IonIcon icon={refresh} slot="start" />
+                    New Pokémon (Cost: {REROLL_COST})
+                  </IonButton>
                 </IonCardContent>
               </IonCard>
             </div>
           )
         )}
+        <IonToast
+          isOpen={!!toastMessage}
+          message={toastMessage}
+          duration={3000}
+          onDidDismiss={() => setToastMessage("")}
+        />
       </IonContent>
     </IonPage>
   );

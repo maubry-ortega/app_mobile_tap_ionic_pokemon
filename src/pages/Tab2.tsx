@@ -16,6 +16,7 @@ import { Pokemon } from "../models/Pokemon.models";
 import PokemonItem from "../components/Pokemons";
 import PokemonFilters from "../components/PokemonFilters";
 import { getDailyPokemon, markDailyAsFound } from "../services/dailyPokemon";
+import { addCoins } from "../services/wallet";
 import "./Tab2.css";
 
 const Tab2: React.FC = () => {
@@ -162,11 +163,14 @@ const Tab2: React.FC = () => {
     filteredPokemons ? true : p.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const handleFound = (pokemon: Pokemon) => {
+  const handleFound = async (pokemon: Pokemon) => {
     const daily = getDailyPokemon();
     if (daily && !daily.found && daily.id === pokemon.id) {
       markDailyAsFound();
-      setToastMessage(`🎉 ¡Encontraste al Pokémon del día! Ganas 50 monedas 💰`);
+      const newBalance = await addCoins(50);
+      setToastMessage(
+        `🎉 You found the daily Pokémon! You earned 50 coins. New balance: ${newBalance} 💰`
+      );
     }
   };
 
