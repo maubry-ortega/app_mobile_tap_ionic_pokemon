@@ -24,6 +24,11 @@ interface PokemonType {
 
 interface PokemonSprites {
   front_default: string | null;
+  other?: {
+    'official-artwork'?: {
+      front_default: string;
+    };
+  };
 }
 
 export interface Pokemon {
@@ -34,4 +39,20 @@ export interface Pokemon {
   abilities: PokemonAbility[];
   types: PokemonType[];
   sprites: PokemonSprites;
+  stats: {
+    base_stat: number;
+    stat: {
+      name: string;
+    };
+  }[];
+}
+
+export interface PokemonSpecies {
+  flavor_text_entries: {
+    flavor_text: string;
+    language: {
+      name: string;
+      url: string;
+    };
+  }[];
 }

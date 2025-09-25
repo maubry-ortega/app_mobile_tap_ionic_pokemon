@@ -1,31 +1,52 @@
 import React, { useEffect, useState } from "react";
 import {
   IonContent,
-  IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
   IonCard,
-  IonCardHeader,
-  IonCardTitle,
   IonCardContent,
+  IonSpinner,
+  IonChip,
 } from "@ionic/react";
-
-import { Pokemon } from "../models/Pokemon.models";
+import { Pokemon, PokemonSpecies } from "../models/Pokemon.models";
 import { getDailyPokemon, setDailyPokemon } from "../services/dailyPokemon";
+import "./Tab1.css";
+
+const typeColorMap: { [key: string]: string } = {
+  normal: "#A8A77A",
+  fire: "#EE8130",
+  water: "#6390F0",
+  electric: "#F7D02C",
+  grass: "#7AC74C",
+  ice: "#96D9D6",
+  fighting: "#C22E28",
+  poison: "#A33EA1",
+  ground: "#E2BF65",
+  flying: "#A98FF3",
+  psychic: "#F95587",
+  bug: "#A6B91A",
+  rock: "#B6A136",
+  ghost: "#735797",
+  dragon: "#6F35FC",
+  dark: "#705746",
+  steel: "#B7B7CE",
+  fairy: "#D685AD",
+};
 
 const Tab1: React.FC = () => {
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+  const [funFact, setFunFact] = useState<string>("");
+  const [backgroundColor, setBackgroundColor] = useState<string>("#ffffff");
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     loadDailyPokemon();
   }, []);
 
   const loadDailyPokemon = async () => {
+    setLoading(true);
     const today = new Date().toISOString().split("T")[0];
     let daily = getDailyPokemon();
 
-    // si no hay Pokémon guardado hoy, generamos uno nuevo
     if (!daily || daily.date !== today) {
       const total = 1025;
       const randomId = Math.floor(Math.random() * total) + 1;
@@ -34,35 +55,95 @@ const Tab1: React.FC = () => {
     }
 
     if (daily) {
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${daily.id}`);
-      const data = await res.json();
-      setPokemon(data);
+      try {
+        const [pokemonRes, speciesRes] = await Promise.all([
+          fetch(`https://pokeapi.co/api/v2/pokemon/${daily.id}`),
+          fetch(`https://pokeapi.co/api/v2/pokemon-species/${daily.id}`),
+        ]);
+
+        if (!pokemonRes.ok || !speciesRes.ok) {
+          throw new Error("Failed to fetch Pokémon data");
+        }
+
+        const pokemonData: Pokemon = await pokemonRes.json();
+        const speciesData: PokemonSpecies = await speciesRes.json();
+
+        setPokemon(pokemonData);
+
+        const primaryType = pokemonData.types[0].type.name;
+        setBackgroundColor(typeColorMap[primaryType] || "#ffffff");
+
+        const fact = speciesData.flavor_text_entries.find(
+          (entry) => entry.language.name === "en"
+        );
+        setFunFact(
+          fact
+            ? fact.flavor_text.replace(/[\n\f]/g, " ")
+            : "No fun fact available."
+        );
+      } catch (error) {
+        console.error("Failed to load Pokémon data", error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Pokémon del Día</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
-        {pokemon && (
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>{pokemon.name}</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <img
-                src={pokemon.sprites.front_default ?? undefined}
-                alt={pokemon.name}
-              />
-              <p>Tipos: {pokemon.types.map((t) => t.type.name).join(", ")}</p>
-              <p>Peso: {pokemon.weight}</p>
-              <p>Altura: {pokemon.height}</p>
-            </IonCardContent>
-          </IonCard>
+      <IonContent fullscreen style={{ '--background': backgroundColor }}>
+        {loading ? (
+          <div className="spinner-container">
+            <IonSpinner name="bubbles" color="light" />
+          </div>
+        ) : (
+          pokemon && (
+            <div className="pokemon-container">
+              <IonCard className="pokemon-card">
+                <img
+                  src={
+                    pokemon.sprites.other?.["official-artwork"]?.front_default ??
+                    (pokemon.sprites.front_default || undefined)
+                  }
+                  alt={pokemon.name}
+                />
+                <IonCardContent>
+                  <h1 className="pokemon-name">{pokemon.name}</h1>
+                  <div className="types-container">
+                    {pokemon.types.map((t) => (
+                      <IonChip
+                        key={t.type.name}
+                        style={{ '--background': typeColorMap[t.type.name] }}
+                      >
+                        {t.type.name}
+                      </IonChip>
+                    ))}
+                  </div>
+                  <div className="info-container">
+                    <p>
+                      <strong>Weight:</strong> {pokemon.weight / 10} kg
+                    </p>
+                    <p>
+                      <strong>Height:</strong> {pokemon.height / 10} m
+                    </p>
+                  </div>
+                  <div className="stats-container">
+                    <h2>Base Stats</h2>
+                    {pokemon.stats.map((s) => (
+                      <div key={s.stat.name} className="stat-row">
+                        <span>{s.stat.name.replace("-", " ")}</span>
+                        <span>{s.base_stat}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="fun-fact">
+                    <h2>Fun Fact</h2>
+                    <p>{funFact}</p>
+                  </div>
+                </IonCardContent>
+              </IonCard>
+            </div>
+          )
         )}
       </IonContent>
     </IonPage>

@@ -1,0 +1,88 @@
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.pokemon-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 20px;
+  text-align: center;
+}
+
+.pokemon-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  --webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  color: #212121;
+}
+
+.pokemon-card img {
+  width: 70%;
+  margin: 0 auto;
+  display: block;
+  padding-top: 20px;
+  image-rendering: pixelated;
+}
+
+.pokemon-name {
+  text-transform: capitalize;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-top: 0;
+}
+
+.types-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.types-container ion-chip {
+  color: white;
+  text-transform: capitalize;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.info-container {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.stats-container {
+  margin-bottom: 20px;
+}
+
+.stats-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 20px;
+  text-transform: capitalize;
+}
+
+.fun-fact {
+  padding: 0 20px 20px;
+}
+
+.fun-fact h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
