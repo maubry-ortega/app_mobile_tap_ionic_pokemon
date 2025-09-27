@@ -1,0 +1,54 @@
+.game-content {
+    --padding-top: 20px;
+    text-align: center;
+  }
+  
+  .wallet-display {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+  }
+  
+  .wallet-display ion-icon {
+    margin-right: 8px;
+    color: var(--ion-color-primary);
+  }
+  
+  .game-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .pokemon-image {
+    width: 200px;
+    height: 200px;
+    margin: 20px auto;
+    transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out;
+  }
+  
+  .pokemon-image.silhouette {
+    filter: brightness(0) contrast(0%);
+    transform: scale(0.9);
+  }
+  
+  .pokemon-image.revealed {
+    filter: brightness(1) contrast(100%);
+    transform: scale(1);
+  }
+  
+  .start-game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 70%;
+    text-align: center;
+  }
+  
+  .start-game-container ion-button {
+    margin-bottom: 16px;
+  }
