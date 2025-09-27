@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   IonContent,
   IonPage,
@@ -7,13 +7,20 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  IonButton,
+  IonToast,
+  IonIcon,
 } from "@ionic/react";
 
-import { Pokemon } from "../models/Pokemon.models";
+import { logoBitcoin } from 'ionicons/icons';
+import { Badge } from "../models/Badge.models";
 import PokemonItem from "../components/Pokemons";
+import BadgeItem from "../components/BadgeItem";
 import { getFavorites } from "../services/favorites";
 import { getCoins } from "../services/wallet";
+import { getAvailableBadges, getOwnedBadgeIds, buyBadge } from "../services/badges";
 import "./Tab3.css";
+import { Pokemon } from "../models/Pokemon.models";
 
 const GoldCoinIcon = () => (
   <svg
@@ -45,6 +52,9 @@ const GoldCoinIcon = () => (
 const Tab3: React.FC = () => {
   const [favorites, setFavorites] = useState<Pokemon[]>([]);
   const [coins, setCoins] = useState(0);
+  const [ownedBadges, setOwnedBadges] = useState<Badge[]>([]);
+  const [shopBadges, setShopBadges] = useState<Badge[]>([]);
+  const [toastMessage, setToastMessage] = useState("");
 
   const loadData = async () => {
     // Load coins
@@ -60,15 +70,31 @@ const Tab3: React.FC = () => {
       })
     );
     setFavorites(pokes);
+
+    // Load badges
+    const allBadges = getAvailableBadges();
+    const ownedIds = await getOwnedBadgeIds();
+    const userOwnedBadges = allBadges.filter(b => ownedIds.includes(b.id));
+    const availableForSale = allBadges.filter(b => !ownedIds.includes(b.id));
+    setOwnedBadges(userOwnedBadges);
+    setShopBadges(availableForSale);
   };
 
   useIonViewWillEnter(() => {
     loadData();
   });
 
+  const handleBuyBadge = async (badgeId: string) => {
+    const result = await buyBadge(badgeId);
+    setToastMessage(result.message);
+    if (result.success) {
+      loadData(); // Refresh all data
+    }
+  };
+
   return (
     <IonPage>
-      <IonContent>
+      <IonContent> 
         <div className="wallet-card">
           <h2 className="wallet-title">My Wallet</h2>
           <div className="coin-balance">
@@ -77,10 +103,53 @@ const Tab3: React.FC = () => {
           </div>
         </div>
 
-        <h2 className="favorites-title">My Favorites</h2>
+        <h2 className="section-title">Mis Medallas</h2>
+        {ownedBadges.length > 0 ? (
+          <IonGrid>
+            <IonRow>
+              {ownedBadges.map((badge) => (
+                <IonCol size="4" size-md="3" size-lg="2" key={badge.id}>
+                  <BadgeItem badge={badge} />
+                </IonCol>
+              ))}
+            </IonRow>
+          </IonGrid>
+        ) : (
+          <div className="ion-padding ion-text-center">
+            <IonLabel>Aún no tienes medallas.</IonLabel>
+          </div>
+        )}
 
+        <h2 className="section-title">Tienda de Medallas</h2>
+        {shopBadges.length > 0 ? (
+          <IonGrid>
+            <IonRow>
+              {shopBadges.map((badge) => (
+                <IonCol size="6" size-md="4" size-lg="3" key={badge.id}>
+                  <div className="shop-item">
+                    <BadgeItem badge={badge} />
+                    <IonButton 
+                      size="small" 
+                      onClick={() => handleBuyBadge(badge.id)}
+                      disabled={coins < badge.cost}
+                    >
+                      Comprar ({badge.cost} 
+                      <IonIcon icon={logoBitcoin} size="small" className="coin-icon-button" />)
+                    </IonButton>
+                  </div>
+                </IonCol>
+              ))}
+            </IonRow>
+          </IonGrid>
+        ) : (
+          <div className="ion-padding ion-text-center">
+            <IonLabel>¡Has comprado todas las medallas!</IonLabel>
+          </div>
+        )}
+
+        <h2 className="section-title">Mis Favoritos</h2>
         {favorites.length > 0 ? (
-          <IonGrid className="pokedex-grid">
+          <IonGrid>
             <IonRow>
               {favorites.map((poke) => (
                 <IonCol size="6" size-md="4" size-lg="3" key={poke.id}>
@@ -91,9 +160,16 @@ const Tab3: React.FC = () => {
           </IonGrid>
         ) : (
           <div className="ion-padding ion-text-center">
-            <IonLabel>You have no favorite Pokémon yet.</IonLabel>
+            <IonLabel>No tienes Pokémon favoritos.</IonLabel>
           </div>
         )}
+
+        <IonToast
+          isOpen={!!toastMessage}
+          message={toastMessage}
+          duration={3000}
+          onDidDismiss={() => setToastMessage("")}
+        />
       </IonContent>
     </IonPage>
   );

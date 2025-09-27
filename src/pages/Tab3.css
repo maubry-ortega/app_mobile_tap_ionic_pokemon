@@ -1,39 +1,65 @@
 .wallet-card {
-    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-    color: white;
-    border-radius: 15px;
+    background: var(--ion-color-light);
     padding: 20px;
-    margin: 20px;
+    border-radius: 15px;
+    margin: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     text-align: center;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-}
-
-.wallet-title {
-    font-size: 1.2rem;
+  }
+  
+  .wallet-title {
+    font-size: 1.5em;
     font-weight: bold;
-    margin: 0;
-    opacity: 0.8;
-}
-
-.coin-balance {
-    font-size: 3rem;
-    font-weight: bold;
-    margin: 10px 0;
+    margin-top: 0;
+    color: var(--ion-color-primary);
+  }
+  
+  .coin-balance {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.coin-icon {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.favorites-title {
-    font-size: 1.8rem;
+    font-size: 2em;
     font-weight: bold;
-    padding: 0 20px;
-    margin-top: 30px;
-    margin-bottom: 10px;
-}
+  }
+  
+  .coin-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+  }
+  
+  .section-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin: 20px 10px 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--ion-color-primary);
+  }
+  
+  .favorites-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin: 20px 10px 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--ion-color-primary);
+  }
+  
+  .shop-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--ion-color-light-tint);
+    border-radius: 10px;
+    padding: 10px;
+    height: 100%;
+  }
+  
+  .shop-item ion-button {
+    margin-top: 10px;
+    width: 100%;
+  }
+  
+  .coin-icon-button {
+    margin-left: 5px;
+  }

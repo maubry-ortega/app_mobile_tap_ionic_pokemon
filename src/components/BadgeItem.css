@@ -1,0 +1,31 @@
+.badge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .badge-icon-wrapper {
+    background-color: var(--ion-color-light);
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--ion-color-medium);
+    padding: 8px;
+  }
+  
+  .badge-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .badge-name {
+    margin-top: 8px;
+    font-size: 0.9em;
+    font-weight: 500;
+  }
+  
